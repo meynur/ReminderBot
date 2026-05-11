@@ -31,7 +31,7 @@ class Target(Base):
     @property
     def display_name(self) -> str:
         if self.thread_id:
-            suffix = self.thread_title or f"Topic #{self.thread_id}"
+            suffix = self.thread_title or f"Топик #{self.thread_id}"
             return f"{self.chat_title} / {suffix}"
         return self.chat_title
 
@@ -57,4 +57,3 @@ class Reminder(Base):
     )
 
     target: Mapped[Target] = relationship(back_populates="reminders", lazy="joined")
-

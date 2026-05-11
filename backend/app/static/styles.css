@@ -11,6 +11,8 @@
   --radius-xl: 28px;
   --radius-lg: 20px;
   --radius-md: 14px;
+  --ease-spring: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 * {
@@ -26,6 +28,7 @@ body {
     radial-gradient(circle at right, rgba(201, 112, 61, 0.22), transparent 28%),
     linear-gradient(180deg, #f8f3ed 0%, #f1e6da 100%);
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 .shell-bg {
@@ -37,6 +40,16 @@ body {
   background-size: 36px 36px;
   mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.68), transparent);
   pointer-events: none;
+  animation: shimmer 20s linear infinite;
+}
+
+.shell-bg::after {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.22), transparent 55%);
+  transform: translate3d(-12%, -10%, 0);
+  animation: glowDrift 16s ease-in-out infinite alternate;
 }
 
 .topbar {
@@ -51,6 +64,7 @@ body {
   backdrop-filter: blur(18px);
   background: rgba(248, 242, 235, 0.75);
   border-bottom: 1px solid var(--stroke);
+  animation: fadeDown 700ms var(--ease-soft) both;
 }
 
 .brand {
@@ -75,6 +89,7 @@ body {
   width: 46px;
   height: 46px;
   font-size: 22px;
+  animation: pulseFloat 4.8s ease-in-out infinite;
 }
 
 .brand strong,
@@ -120,6 +135,7 @@ small,
   gap: 22px;
   padding: 30px;
   margin-bottom: 22px;
+  animation: fadeUp 760ms var(--ease-soft) both;
 }
 
 .eyebrow {
@@ -153,6 +169,8 @@ small,
   border-radius: var(--radius-lg);
   background: var(--bg-soft);
   border: 1px solid rgba(84, 59, 36, 0.08);
+  animation: fadeUp 820ms var(--ease-soft) both;
+  transition: transform 220ms var(--ease-spring), box-shadow 220ms ease, border-color 220ms ease;
 }
 
 .stat-card strong {
@@ -163,6 +181,18 @@ small,
   background: linear-gradient(135deg, #fff7f1, var(--accent-soft));
 }
 
+.stats-grid .stat-card:nth-child(1) {
+  animation-delay: 120ms;
+}
+
+.stats-grid .stat-card:nth-child(2) {
+  animation-delay: 200ms;
+}
+
+.stats-grid .stat-card:nth-child(3) {
+  animation-delay: 280ms;
+}
+
 .content-grid {
   display: grid;
   grid-template-columns: 1.4fr 1fr;
@@ -171,11 +201,21 @@ small,
 
 .panel-card {
   padding: 24px;
+  animation: fadeUp 900ms var(--ease-soft) both;
+  transition: transform 220ms var(--ease-spring), box-shadow 220ms ease, border-color 220ms ease;
 }
 
 .panel-card.narrow {
   max-width: 760px;
   margin: 0 auto;
+}
+
+.content-grid > .panel-card:nth-child(1) {
+  animation-delay: 140ms;
+}
+
+.content-grid > .panel-card:nth-child(2) {
+  animation-delay: 240ms;
 }
 
 .section-head {
@@ -193,6 +233,18 @@ small,
 
 .table-wrap {
   overflow-x: auto;
+}
+
+tbody tr {
+  animation: fadeUp 700ms var(--ease-soft) both;
+}
+
+tbody tr:nth-child(odd) {
+  animation-delay: 120ms;
+}
+
+tbody tr:nth-child(even) {
+  animation-delay: 200ms;
 }
 
 table {
@@ -237,7 +289,7 @@ textarea {
   border-radius: 999px;
   text-decoration: none;
   border: 1px solid rgba(85, 58, 31, 0.16);
-  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+  transition: transform 180ms var(--ease-spring), box-shadow 180ms ease, background 180ms ease, border-color 180ms ease;
 }
 
 .ghost-button {
@@ -260,7 +312,8 @@ textarea {
 .ghost-button:hover,
 .primary-button:hover,
 button:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 14px 30px rgba(64, 41, 20, 0.12);
 }
 
 .target-list {
@@ -282,6 +335,24 @@ button:hover {
   justify-content: space-between;
   align-items: center;
   gap: 16px;
+  animation: fadeUp 820ms var(--ease-soft) both;
+  transition: transform 220ms var(--ease-spring), box-shadow 220ms ease, border-color 220ms ease;
+}
+
+.target-item:nth-child(1) {
+  animation-delay: 120ms;
+}
+
+.target-item:nth-child(2) {
+  animation-delay: 180ms;
+}
+
+.target-item:nth-child(3) {
+  animation-delay: 240ms;
+}
+
+.target-item:nth-child(n + 4) {
+  animation-delay: 300ms;
 }
 
 .stack-form {
@@ -301,10 +372,20 @@ textarea {
   border-radius: var(--radius-md);
   border: 1px solid rgba(76, 52, 30, 0.18);
   background: rgba(255, 255, 255, 0.84);
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
 }
 
 textarea {
   resize: vertical;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: rgba(191, 79, 23, 0.42);
+  box-shadow: 0 0 0 4px rgba(191, 79, 23, 0.12);
+  transform: translateY(-1px);
 }
 
 .checkbox-row {
@@ -326,6 +407,7 @@ textarea {
 .login-card {
   width: min(100%, 540px);
   text-align: center;
+  animation: zoomIn 760ms var(--ease-soft) both;
 }
 
 .hero-icon {
@@ -333,6 +415,7 @@ textarea {
   height: 72px;
   margin: 0 auto 16px;
   font-size: 32px;
+  animation: pulseFloat 5.2s ease-in-out infinite;
 }
 
 .alert {
@@ -340,6 +423,7 @@ textarea {
   border-radius: var(--radius-md);
   background: #ffe6db;
   color: #8a2f0e;
+  animation: shakeIn 520ms var(--ease-soft) both;
 }
 
 code {
@@ -350,6 +434,92 @@ code {
 
 form {
   margin: 0;
+}
+
+.stat-card:hover,
+.panel-card:hover,
+.target-item:hover {
+  transform: translateY(-4px);
+  border-color: rgba(191, 79, 23, 0.18);
+  box-shadow: 0 26px 60px rgba(64, 41, 20, 0.16);
+}
+
+@keyframes fadeDown {
+  from {
+    opacity: 0;
+    transform: translateY(-18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes pulseFloat {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-4px) scale(1.03);
+  }
+}
+
+@keyframes glowDrift {
+  from {
+    transform: translate3d(-12%, -10%, 0) scale(1);
+  }
+  to {
+    transform: translate3d(10%, 8%, 0) scale(1.08);
+  }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 0 0, 0 0;
+  }
+  to {
+    background-position: 36px 36px, -36px -36px;
+  }
+}
+
+@keyframes shakeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  50% {
+    transform: translateY(0) translateX(-3px);
+  }
+  75% {
+    transform: translateX(3px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 @media (max-width: 900px) {
@@ -375,3 +545,12 @@ form {
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

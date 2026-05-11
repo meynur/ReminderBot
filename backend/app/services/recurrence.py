@@ -12,7 +12,7 @@ def make_schedule_meta(schedule_type: str, start_at: datetime) -> dict | None:
         return {"weekday": start_at.weekday(), "hour": start_at.hour, "minute": start_at.minute}
     if schedule_type == "monthly":
         return {"day": start_at.day, "hour": start_at.hour, "minute": start_at.minute}
-    raise ValueError(f"Unsupported schedule type: {schedule_type}")
+    raise ValueError(f"Неподдерживаемый тип расписания: {schedule_type}")
 
 
 def compute_next_run(schedule_type: str, current_run: datetime) -> datetime | None:
@@ -39,7 +39,7 @@ def compute_next_run(schedule_type: str, current_run: datetime) -> datetime | No
         target_day = min(day, _days_in_month(target_year, target_month))
         return current_run.replace(year=target_year, month=target_month, day=target_day)
 
-    raise ValueError(f"Unsupported schedule type: {schedule_type}")
+    raise ValueError(f"Неподдерживаемый тип расписания: {schedule_type}")
 
 
 def describe_schedule(schedule_type: str) -> str:

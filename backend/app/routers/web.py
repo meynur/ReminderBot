@@ -34,7 +34,7 @@ async def login_submit(request: Request, token: str = Form(...)) -> Response:
         response = RedirectResponse(url="/", status_code=303)
         response.set_cookie("muad_panel_auth", token, httponly=True, samesite="lax")
         return response
-    return templates.TemplateResponse("login.html", {"request": request, "error": "Nevernyy token"}, status_code=401)
+    return templates.TemplateResponse("login.html", {"request": request, "error": "Неверный токен"}, status_code=401)
 
 
 @router.get("/logout")
