@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Редактирование{% endblock %}
+{% block content %}
+<section class="panel-card narrow">
+  {% if reminder %}
+  <div class="section-head">
+    <h2>Редактирование напоминания</h2>
+    <span>{{ reminder.id }}</span>
+  </div>
+  <form method="post" class="stack-form">
+    <label for="text">Текст</label>
+    <textarea id="text" name="text" rows="4" required>{{ reminder.text }}</textarea>
+
+    <label for="next_run_at">Следующий запуск</label>
+    <input id="next_run_at" name="next_run_at" type="datetime-local" value="{{ local_value }}" required />
+
+    <label for="schedule_type">Повторение</label>
+    <select id="schedule_type" name="schedule_type">
+      <option value="once" {% if reminder.schedule_type == "once" %}selected{% endif %}>Один раз</option>
+      <option value="daily" {% if reminder.schedule_type == "daily" %}selected{% endif %}>Каждый день</option>
+      <option value="weekly" {% if reminder.schedule_type == "weekly" %}selected{% endif %}>Каждую неделю</option>
+      <option value="monthly" {% if reminder.schedule_type == "monthly" %}selected{% endif %}>Каждый месяц</option>
+    </select>
+
+    <label class="checkbox-row">
+      <input name="is_active" type="checkbox" {% if reminder.is_active %}checked{% endif %} />
+      <span>Напоминание активно</span>
+    </label>
+
+    <div class="row-actions">
+      <button type="submit" class="primary-button">Сохранить</button>
+      <a href="/" class="ghost-button">Назад</a>
+    </div>
+  </form>
+  {% else %}
+  <div class="empty-state">
+    <p>Напоминание не найдено.</p>
+    <a href="/" class="ghost-button">Вернуться в панель</a>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}
+

@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Панель{% endblock %}
+{% block content %}
+<section class="hero-panel">
+  <div>
+    <span class="eyebrow">Управление ботом</span>
+    <h1>Напоминания, чаты и топики в одном месте</h1>
+    <p>Бот хранит задачи в базе, а отсюда удобно просматривать активные расписания, запускать тесты и быстро редактировать регулярные напоминания.</p>
+  </div>
+  <div class="stats-grid">
+    <article class="stat-card">
+      <span>Активных напоминаний</span>
+      <strong>{{ total_reminders }}</strong>
+    </article>
+    <article class="stat-card">
+      <span>Привязанных целей</span>
+      <strong>{{ total_targets }}</strong>
+    </article>
+    <article class="stat-card accent">
+      <span>Часовой пояс</span>
+      <strong>{{ timezone_name }}</strong>
+    </article>
+  </div>
+</section>
+
+<section class="content-grid">
+  <article class="panel-card">
+    <div class="section-head">
+      <h2>Активные напоминания</h2>
+      <span>{{ reminders|length }} шт.</span>
+    </div>
+    {% if reminders %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Текст</th>
+            <th>Куда</th>
+            <th>Следующий запуск</th>
+            <th>Повтор</th>
+            <th>Действия</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for reminder in reminders %}
+          <tr>
+            <td>
+              <strong>{{ reminder.text }}</strong>
+              <small>ID: {{ reminder.id }}</small>
+            </td>
+            <td>{{ reminder.target.display_name }}</td>
+            <td>{{ to_local(reminder.next_run_at, timezone_name) }}</td>
+            <td>{{ describe_schedule(reminder.schedule_type) }}</td>
+            <td class="actions-cell">
+              <a href="/reminders/{{ reminder.id }}/edit" class="ghost-button">Редактировать</a>
+              <form method="post" action="/reminders/{{ reminder.id }}/toggle">
+                <button type="submit" class="ghost-button">{% if reminder.is_active %}Остановить{% else %}Запустить{% endif %}</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <p>Пока нет активных напоминаний.</p>
+      <p>Создайте первое через личный чат с ботом и меню <code>/menu</code>.</p>
+    </div>
+    {% endif %}
+  </article>
+
+  <article class="panel-card">
+    <div class="section-head">
+      <h2>Чаты и топики</h2>
+      <span>{{ targets|length }} шт.</span>
+    </div>
+    {% if targets %}
+    <div class="target-list">
+      {% for target in targets %}
+      <div class="target-item">
+        <div>
+          <strong>{{ target.display_name }}</strong>
+          <small>chat_id={{ target.chat_id }}{% if target.thread_id %}, thread={{ target.thread_id }}{% endif %}</small>
+        </div>
+        <form method="post" action="/targets/{{ target.id }}/test">
+          <button type="submit" class="primary-button slim">Отправить тест</button>
+        </form>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <p>Нет привязанных чатов.</p>
+      <p>Отправьте <code>/bind</code> в нужный чат или тему форума Telegram.</p>
+    </div>
+    {% endif %}
+  </article>
+</section>
+{% endblock %}
+

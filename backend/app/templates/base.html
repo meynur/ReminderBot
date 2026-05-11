@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Muad Reminder{% endblock %}</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="shell-bg"></div>
+    <header class="topbar">
+      <a href="/" class="brand">
+        <span class="brand-badge">⏰</span>
+        <span>
+          <strong>Muad Reminder</strong>
+          <small>панель управления напоминаниями</small>
+        </span>
+      </a>
+      <nav class="top-actions">
+        <a href="/" class="ghost-button">Панель</a>
+        <a href="/logout" class="ghost-button">Выйти</a>
+      </nav>
+    </header>
+    <main class="page">{% block content %}{% endblock %}</main>
+  </body>
+</html>
+

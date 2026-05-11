@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Вход в панель</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body class="login-body">
+    <div class="shell-bg"></div>
+    <section class="login-card">
+      <div class="hero-icon">🛡️</div>
+      <h1>Вход в Muad Reminder</h1>
+      <p>Введите токен панели, указанный в файле <code>.env</code>.</p>
+      {% if error %}
+      <div class="alert">{{ error }}</div>
+      {% endif %}
+      <form method="post" class="stack-form">
+        <label for="token">Токен панели</label>
+        <input id="token" name="token" type="password" placeholder="change-me-panel-token" required />
+        <button type="submit" class="primary-button">Открыть панель</button>
+      </form>
+    </section>
+  </body>
+</html>
+
