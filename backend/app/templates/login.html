@@ -8,10 +8,14 @@
   </head>
   <body class="login-body">
     <div class="shell-bg"></div>
+    <div class="shell-orb orb-a"></div>
+    <div class="shell-orb orb-b"></div>
+    <div class="shell-orb orb-c"></div>
     <section class="login-card">
-      <div class="hero-icon">🛡️</div>
-      <h1>Вход в Muad Reminder</h1>
-      <p>Введите токен панели, указанный в файле <code>.env</code>.</p>
+      <div class="hero-icon">🔐</div>
+      <span class="eyebrow">Muad Reminder</span>
+      <h1>Вход в панель управления</h1>
+      <p>Введите токен панели из файла <code>.env</code>, чтобы открыть доступ к управлению ботом.</p>
       {% if error %}
       <div class="alert">{{ error }}</div>
       {% endif %}

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Form, Request
@@ -22,6 +22,55 @@ def _to_local(dt: datetime, timezone_name: str) -> str:
     return dt.astimezone(ZoneInfo(timezone_name)).strftime("%d.%m.%Y %H:%M")
 
 
+def _flash_from_status(status: str | None) -> dict[str, str] | None:
+    messages = {
+        "created": {
+            "kind": "success",
+            "title": "Напоминание создано",
+            "text": "Новое напоминание сохранено и уже доступно в общем списке ниже.",
+        },
+        "invalid-target": {
+            "kind": "error",
+            "title": "Цель не найдена",
+            "text": "Выберите существующий чат или топик из списка привязок и попробуйте снова.",
+        },
+        "invalid-date": {
+            "kind": "error",
+            "title": "Некорректная дата",
+            "text": "Проверьте дату и время первого запуска, затем отправьте форму ещё раз.",
+        },
+        "empty-text": {
+            "kind": "error",
+            "title": "Пустой текст",
+            "text": "Добавьте текст напоминания, чтобы бот понимал, что именно нужно отправить.",
+        },
+    }
+    return messages.get(status)
+
+
+async def _build_dashboard_context(request: Request, status: str | None = None) -> dict:
+    settings = get_settings()
+    async with SessionLocal() as session:
+        reminders = list((await session.scalars(select(Reminder).order_by(Reminder.next_run_at.asc()))).all())
+        targets = list((await session.scalars(select(Target).where(Target.is_active.is_(True)).order_by(Target.chat_title))).all())
+        total_reminders = await session.scalar(select(func.count(Reminder.id)).where(Reminder.is_active.is_(True)))
+        total_targets = await session.scalar(select(func.count(Target.id)).where(Target.is_active.is_(True)))
+
+    default_next_run = (datetime.now(ZoneInfo(settings.default_timezone)) + timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M")
+    return {
+        "request": request,
+        "reminders": reminders,
+        "targets": targets,
+        "total_reminders": total_reminders or 0,
+        "total_targets": total_targets or 0,
+        "timezone_name": settings.default_timezone,
+        "describe_schedule": describe_schedule,
+        "to_local": _to_local,
+        "default_next_run": default_next_run,
+        "flash": _flash_from_status(status),
+    }
+
+
 @router.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request) -> HTMLResponse:
     return templates.TemplateResponse("login.html", {"request": request})
@@ -34,7 +83,7 @@ async def login_submit(request: Request, token: str = Form(...)) -> Response:
         response = RedirectResponse(url="/", status_code=303)
         response.set_cookie("muad_panel_auth", token, httponly=True, samesite="lax")
         return response
-    return templates.TemplateResponse("login.html", {"request": request, "error": "Неверный токен"}, status_code=401)
+    return templates.TemplateResponse("login.html", {"request": request, "error": "Неверный токен панели"}, status_code=401)
 
 
 @router.get("/logout")
@@ -45,33 +94,49 @@ async def logout() -> RedirectResponse:
 
 
 @router.get("/", response_class=HTMLResponse)
-async def dashboard(request: Request) -> HTMLResponse:
-    settings = get_settings()
-    async with SessionLocal() as session:
-        reminders = list(
-            (
-                await session.scalars(
-                    select(Reminder).where(Reminder.is_active.is_(True)).order_by(Reminder.next_run_at.asc())
-                )
-            ).all()
-        )
-        targets = list((await session.scalars(select(Target).where(Target.is_active.is_(True)).order_by(Target.chat_title))).all())
-        total_reminders = await session.scalar(select(func.count(Reminder.id)).where(Reminder.is_active.is_(True)))
-        total_targets = await session.scalar(select(func.count(Target.id)).where(Target.is_active.is_(True)))
+async def dashboard(request: Request, status: str | None = None) -> HTMLResponse:
+    return templates.TemplateResponse("dashboard.html", await _build_dashboard_context(request, status=status))
 
-    return templates.TemplateResponse(
-        "dashboard.html",
-        {
-            "request": request,
-            "reminders": reminders,
-            "targets": targets,
-            "total_reminders": total_reminders or 0,
-            "total_targets": total_targets or 0,
-            "timezone_name": settings.default_timezone,
-            "describe_schedule": describe_schedule,
-            "to_local": _to_local,
-        },
-    )
+
+@router.post("/reminders/create")
+async def create_reminder(
+    target_id: int = Form(...),
+    text: str = Form(...),
+    next_run_at: str = Form(...),
+    schedule_type: str = Form(...),
+    is_active: str | None = Form(default=None),
+) -> RedirectResponse:
+    settings = get_settings()
+    clean_text = text.strip()
+    if not clean_text:
+        return RedirectResponse(url="/?status=empty-text", status_code=303)
+
+    try:
+        local_dt = datetime.strptime(next_run_at, "%Y-%m-%dT%H:%M").replace(tzinfo=ZoneInfo(settings.default_timezone))
+    except ValueError:
+        return RedirectResponse(url="/?status=invalid-date", status_code=303)
+
+    async with SessionLocal() as session:
+        target = await session.get(Target, target_id)
+        if target is None:
+            return RedirectResponse(url="/?status=invalid-target", status_code=303)
+
+        reminder = Reminder(
+            target_id=target.id,
+            text=clean_text,
+            source_text=clean_text,
+            schedule_type=schedule_type,
+            schedule_meta=make_schedule_meta(schedule_type, local_dt),
+            timezone=settings.default_timezone,
+            start_at=local_dt.astimezone(timezone.utc),
+            next_run_at=local_dt.astimezone(timezone.utc),
+            created_by_user_id=settings.admin_user_id,
+            is_active=is_active == "on",
+        )
+        session.add(reminder)
+        await session.commit()
+
+    return RedirectResponse(url="/?status=created", status_code=303)
 
 
 @router.get("/reminders/{reminder_id}/edit", response_class=HTMLResponse)
