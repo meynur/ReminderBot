@@ -19,6 +19,8 @@ Telegram-bot dlya razovykh i regulyarnykh napominaniy s privyazkoy k chatam i to
    - `BOT_USERNAME`
    - `ADMIN_USER_ID`
    - `PUBLIC_BASE_URL`
+   - `POSTGRES_PASSWORD`
+   - `DATABASE_URL` can be left empty, the app will build it from `POSTGRES_*`
 2. Linux:
    ```bash
    chmod +x scripts/install.sh scripts/manage.sh

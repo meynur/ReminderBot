@@ -7,7 +7,7 @@ from app.config import get_settings
 
 
 settings = get_settings()
-engine = create_async_engine(settings.database_url, future=True, echo=False)
+engine = create_async_engine(settings.resolved_database_url, future=True, echo=False)
 SessionLocal = async_sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
 
 
@@ -18,4 +18,3 @@ class Base(DeclarativeBase):
 async def get_session() -> AsyncGenerator[AsyncSession, None]:
     async with SessionLocal() as session:
         yield session
-
