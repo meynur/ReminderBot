@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Form, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import func, select
 
@@ -27,8 +27,8 @@ async def login_page(request: Request) -> HTMLResponse:
     return templates.TemplateResponse("login.html", {"request": request})
 
 
-@router.post("/login")
-async def login_submit(request: Request, token: str = Form(...)) -> HTMLResponse | RedirectResponse:
+@router.post("/login", response_model=None)
+async def login_submit(request: Request, token: str = Form(...)) -> Response:
     settings = get_settings()
     if token == settings.panel_token:
         response = RedirectResponse(url="/", status_code=303)
